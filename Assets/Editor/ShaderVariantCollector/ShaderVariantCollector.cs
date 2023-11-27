@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using Debug = UnityEngine.Debug;
+using Common;
 
 public static class ShaderVariantCollector
 {
@@ -54,7 +55,6 @@ public static class ShaderVariantCollector
 		AssetDatabase.DeleteAsset(savePath);
 		EditorTools.CreateFileDirectory(savePath);
 		_savePath = savePath;
-		_packageName = packageName;
 		_processMaxNum = processMaxNum;
 		_completedCallback = completedCallback;
 
@@ -144,16 +144,20 @@ public static class ShaderVariantCollector
 		List<string> allAssets = new List<string>(1000);
 
 		// 获取所有打包的资源
-		CollectResult collectResult = AssetBundleCollectorSettingData.Setting.GetPackageAssets(EBuildMode.DryRunBuild, _packageName);
-		foreach (var assetInfo in collectResult.CollectAssets)
+		string collectDirectory = "Assets/GameRes";
+		string[] findAssets = EditorTools.FindAssets(EAssetSearchType.All, collectDirectory);
+		foreach (string assetPath in findAssets)
 		{
-			string[] depends = AssetDatabase.GetDependencies(assetInfo.AssetPath, true);
-			foreach (var dependAsset in depends)
-			{
-				if (allAssets.Contains(dependAsset) == false)
-					allAssets.Add(dependAsset);
-			}
-			EditorTools.DisplayProgressBar("获取所有打包资源", ++progressValue, collectResult.CollectAssets.Count);
+			string[] depends = AssetDatabase.GetDependencies(assetPath, true);
+			foreach (string depend in depends)
+            {
+				if (!allAssets.Contains(depend))
+                {
+					allAssets.Add(depend);
+                }
+            }
+
+			EditorTools.DisplayProgressBar("获取所有打包资源", ++progressValue, findAssets.Length);
 		}
 		EditorTools.ClearProgressBar();
 

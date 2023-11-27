@@ -5,7 +5,7 @@ using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEditor;
-using YooAsset.Editor;
+using Common;
 
 public static class ShaderVariantCollectionHelper
 {

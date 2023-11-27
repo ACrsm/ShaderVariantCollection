@@ -28,7 +28,7 @@ public class ShaderVariantCollectorWindow : EditorWindow
 			{
 				if (GUILayout.Button("一键收集Shader变体"))
 				{
-
+					CollectButton_clicked();
 				}
 			}
 			GUILayout.EndVertical();

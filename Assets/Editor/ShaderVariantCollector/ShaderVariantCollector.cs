@@ -25,6 +25,7 @@ public static class ShaderVariantCollector
 	private const float SleepMilliseconds = 100f;
 	private static string _savePath;
 	private static int _processMaxNum;
+	private static List<string> _collectMaterialPathList;
 	private static Action _completedCallback;
 
 	private static ESteps _steps = ESteps.None;
@@ -36,7 +37,7 @@ public static class ShaderVariantCollector
 	/// <summary>
 	/// 开始收集
 	/// </summary>
-	public static void Run(string savePath, int processMaxNum, Action completedCallback)
+	public static void Run(string savePath, int processMaxNum, List<string> collectMaterialPathList, Action completedCallback)
 	{
 		if (_steps != ESteps.None)
 			return;
@@ -56,6 +57,7 @@ public static class ShaderVariantCollector
 		EditorTools.CreateFileDirectory(savePath);
 		_savePath = savePath;
 		_processMaxNum = processMaxNum;
+		_collectMaterialPathList = new List<string>(collectMaterialPathList);
 		_completedCallback = completedCallback;
 
 		// 聚焦到游戏窗口
@@ -144,21 +146,24 @@ public static class ShaderVariantCollector
 		List<string> allAssets = new List<string>(1000);
 
 		// 获取所有打包的资源
-		string collectDirectory = "Assets/GameRes";
-		string[] findAssets = EditorTools.FindAssets(EAssetSearchType.All, collectDirectory);
-		foreach (string assetPath in findAssets)
-		{
-			string[] depends = AssetDatabase.GetDependencies(assetPath, true);
-			foreach (string depend in depends)
-            {
-				if (!allAssets.Contains(depend))
-                {
-					allAssets.Add(depend);
-                }
-            }
+		foreach (string matDirPath in _collectMaterialPathList)
+        {
+			string[] findAssets = EditorTools.FindAssets(EAssetSearchType.All, matDirPath);
+			foreach (string assetPath in findAssets)
+			{
+				string[] depends = AssetDatabase.GetDependencies(assetPath, true);
+				foreach (string depend in depends)
+				{
+					if (!allAssets.Contains(depend))
+					{
+						allAssets.Add(depend);
+					}
+				}
 
-			EditorTools.DisplayProgressBar("获取所有打包资源", ++progressValue, findAssets.Length);
+				EditorTools.DisplayProgressBar($"获取{matDirPath}所有打包资源", ++progressValue, findAssets.Length);
+			}
 		}
+		
 		EditorTools.ClearProgressBar();
 
 		// 搜集所有材质球

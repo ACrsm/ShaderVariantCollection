@@ -1,1 +1,2 @@
 # ShaderVariantCollection
+来自于YooAssets的变体收集，方便移植到其他项目
